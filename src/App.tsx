@@ -10,14 +10,19 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Cart from "./pages/Cart";
-import { CartProvider } from "@/context/CartContext"; // Import the CartProvider
+import { CartProvider } from "@/context/CartContext";
 import Checkout from "./pages/Checkout"
 const queryClient = new QueryClient();
-
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProductManagement from "./pages/admin/AdminProductManagement";
+import AdminReviewManagement from "./pages/admin/AdminReviewManagement";
+import AdminLayout from "./components/admin/AdminLayout";
+import { AdminAuthProvider } from "./context/AdminAuthContext";
+import AdminOrderManagement from "./pages/admin/AdminOrderManagement";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      {/* Wrap your app with CartProvider */}
       <CartProvider>
         <Toaster />
         <Sonner />
@@ -30,7 +35,25 @@ const App = () => (
             <Route path="/cart" element={<Cart />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/checkout" element={<Checkout />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
+            {/* Admin routes */}
+            <Route path="/admin/login" element={
+              <AdminAuthProvider>
+                <AdminLogin />
+              </AdminAuthProvider>
+            } />
+            
+            <Route path="/admin" element={
+              <AdminAuthProvider>
+                <AdminLayout />
+              </AdminAuthProvider>
+            }>
+              <Route index element={<AdminDashboard />} />
+              <Route path="products" element={<AdminProductManagement />} />
+              <Route path="reviews" element={<AdminReviewManagement />} />
+              <Route path="orders" element={<AdminOrderManagement />} />
+            </Route>
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
@@ -38,5 +61,4 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
 export default App;
