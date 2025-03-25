@@ -8,7 +8,8 @@ import {
   CheckCircle,
   TruckIcon,
   PackageCheck,
-  Clock
+  Clock,
+  Plus
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { 
@@ -39,6 +40,17 @@ interface Order {
   total: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered';
   date: string;
+}
+
+interface NewOrderForm {
+  customerName: string;
+  whatsappNumber: string;
+  address: string;
+  items: {
+    name: string;
+    price: number;
+    quantity: number;
+  }[];
 }
 
 const dummyOrders: Order[] = [
@@ -101,6 +113,13 @@ const AdminOrderManagement: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [statusUpdateOrder, setStatusUpdateOrder] = useState<Order | null>(null);
+  const [showNewOrderModal, setShowNewOrderModal] = useState(false);
+  const [newOrderForm, setNewOrderForm] = useState<NewOrderForm>({
+    customerName: '',
+    whatsappNumber: '',
+    address: '',
+    items: [{ name: '', price: 0, quantity: 1 }]
+  });
 
   useEffect(() => {
     // Simulate API call to fetch orders
@@ -150,6 +169,96 @@ const AdminOrderManagement: React.FC = () => {
     
     setStatusUpdateOrder(null);
     toast.success(`Order status updated to ${status}`);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof NewOrderForm) => {
+    setNewOrderForm({
+      ...newOrderForm,
+      [field]: e.target.value
+    });
+  };
+
+  const handleItemChange = (index: number, field: keyof OrderItem, value: string | number) => {
+    const updatedItems = [...newOrderForm.items];
+    updatedItems[index] = { 
+      ...updatedItems[index], 
+      [field]: typeof value === 'string' && field === 'price' ? parseFloat(value) || 0 : value 
+    };
+    
+    setNewOrderForm({
+      ...newOrderForm,
+      items: updatedItems
+    });
+  };
+
+  const addItemField = () => {
+    setNewOrderForm({
+      ...newOrderForm,
+      items: [...newOrderForm.items, { name: '', price: 0, quantity: 1 }]
+    });
+  };
+
+  const removeItemField = (index: number) => {
+    if (newOrderForm.items.length === 1) return;
+    
+    const updatedItems = [...newOrderForm.items];
+    updatedItems.splice(index, 1);
+    
+    setNewOrderForm({
+      ...newOrderForm,
+      items: updatedItems
+    });
+  };
+
+  const calculateTotal = () => {
+    return newOrderForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  };
+
+  const handleCreateOrder = () => {
+    // Validate form
+    if (!newOrderForm.customerName.trim() || !newOrderForm.whatsappNumber.trim() || !newOrderForm.address.trim()) {
+      toast.error("Please fill all customer information fields");
+      return;
+    }
+
+    if (newOrderForm.items.some(item => !item.name.trim() || item.price <= 0)) {
+      toast.error("Please fill all item details correctly");
+      return;
+    }
+
+    // Generate new order ID
+    const newOrderId = `ORD-${(orders.length + 1).toString().padStart(3, '0')}`;
+    
+    // Create new order
+    const newOrder: Order = {
+      id: newOrderId,
+      customerName: newOrderForm.customerName,
+      whatsappNumber: newOrderForm.whatsappNumber,
+      address: newOrderForm.address,
+      items: newOrderForm.items.map((item, index) => ({
+        id: (index + 1).toString(),
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity
+      })),
+      total: calculateTotal(),
+      status: 'pending',
+      date: new Date().toISOString()
+    };
+    
+    // Add new order to list
+    setOrders([newOrder, ...orders]);
+    
+    // Reset form and close modal
+    setNewOrderForm({
+      customerName: '',
+      whatsappNumber: '',
+      address: '',
+      items: [{ name: '', price: 0, quantity: 1 }]
+    });
+    setShowNewOrderModal(false);
+    
+    toast.success("New order created successfully");
   };
 
   // Filter and sort orders
@@ -210,6 +319,13 @@ const AdminOrderManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-2xl font-bold text-gray-800">Order Management</h2>
+        <PrimaryButton 
+          onClick={() => setShowNewOrderModal(true)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          New Order
+        </PrimaryButton>
       </div>
       
       {/* Search and Filter */}
@@ -326,7 +442,7 @@ const AdminOrderManagement: React.FC = () => {
                           <p className="text-gray-500">No orders match your search term</p>
                           <button 
                             onClick={() => setSearchTerm('')}
-                            className="text-alam-600 hover:text-alam-800 mt-2"
+                            className="text-primary hover:text-primary/80 mt-2"
                           >
                             Clear search
                           </button>
@@ -543,6 +659,156 @@ const AdminOrderManagement: React.FC = () => {
               >
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Order Modal */}
+      {showNewOrderModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Create New Order
+              </h3>
+              <button 
+                onClick={() => setShowNewOrderModal(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="space-y-6">
+                {/* Customer Information */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 uppercase mb-3">Customer Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
+                        Full Name
+                      </label>
+                      <Input
+                        id="customerName"
+                        value={newOrderForm.customerName}
+                        onChange={(e) => handleInputChange(e, 'customerName')}
+                        placeholder="Customer full name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="whatsappNumber" className="block text-sm font-medium text-gray-700">
+                        WhatsApp Number
+                      </label>
+                      <Input
+                        id="whatsappNumber"
+                        value={newOrderForm.whatsappNumber}
+                        onChange={(e) => handleInputChange(e, 'whatsappNumber')}
+                        placeholder="+923001234567"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                      Shipping Address
+                    </label>
+                    <textarea
+                      id="address"
+                      value={newOrderForm.address}
+                      onChange={(e) => handleInputChange(e, 'address')}
+                      placeholder="Complete shipping address"
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+                
+                {/* Order Items */}
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase">Order Items</h4>
+                    <button 
+                      onClick={addItemField}
+                      className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Item
+                    </button>
+                  </div>
+                  
+                  {newOrderForm.items.map((item, index) => (
+                    <div key={index} className="mb-4 p-4 border rounded-lg">
+                      <div className="flex justify-between mb-2">
+                        <h5 className="text-sm font-medium">Item #{index + 1}</h5>
+                        {newOrderForm.items.length > 1 && (
+                          <button
+                            onClick={() => removeItemField(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Product Name
+                          </label>
+                          <Input
+                            value={item.name}
+                            onChange={(e) => handleItemChange(index, 'name', e.target.value)}
+                            placeholder="Product name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Price (Rs.)
+                          </label>
+                          <Input
+                            type="number"
+                            value={item.price}
+                            onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                            placeholder="0"
+                            min="0"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Quantity
+                          </label>
+                          <Input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value) || 1)}
+                            placeholder="1"
+                            min="1"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-2 text-right text-sm font-medium text-gray-700">
+                        Subtotal: Rs. {(item.price * item.quantity).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="mt-4 text-right text-lg font-bold">
+                    Total: Rs. {calculateTotal().toLocaleString()}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-end gap-4">
+                <button
+                  onClick={() => setShowNewOrderModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <PrimaryButton onClick={handleCreateOrder}>
+                  Create Order
+                </PrimaryButton>
+              </div>
             </div>
           </div>
         </div>
