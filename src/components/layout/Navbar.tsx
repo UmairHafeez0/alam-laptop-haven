@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container } from '@/components/ui/Container';
 import { cn } from '@/lib/utils';
 import { Laptop, Search, ShoppingCart, Menu, X } from 'lucide-react';
+import { useCart } from "@/context/CartContext";
 import { 
   Sheet, 
   SheetContent, 
@@ -32,7 +33,7 @@ export function Navbar() {
   const sheetCloseRef = useRef<HTMLButtonElement>(null);
   const { pathname } = useLocation();
   const navigate = useNavigate();
-
+  const { totalItems } = useCart();
   // Handle scroll event
   useEffect(() => {
     const handleScroll = () => {
@@ -131,16 +132,17 @@ export function Navbar() {
                 </form>
               </PopoverContent>
             </Popover>
-            
             <Link
-              to="/cart"
-              className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors relative"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-alam-600 text-[10px] font-medium text-white">
-                0
-              </span>
-            </Link>
+  to="/cart"
+  className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors relative"
+>
+  <ShoppingCart className="h-5 w-5" />
+  {totalItems > 0 && (
+    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-alam-600 text-[10px] font-medium text-white">
+      {totalItems}
+    </span>
+  )}
+</Link>
           </div>
 
           {/* Mobile Menu Sheet */}
@@ -220,16 +222,28 @@ export function Navbar() {
                 
                 {/* Mobile Cart Link */}
                 <div className="mt-auto p-4 border-t">
-                  <SheetClose asChild>
-                    <Link
-                      to="/cart"
-                      className="flex items-center gap-2 px-4 py-3 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                    >
-                      <ShoppingCart className="h-5 w-5" />
-                      <span>Cart (0)</span>
-                    </Link>
-                  </SheetClose>
-                </div>
+      <SheetClose asChild>
+        <Link
+          to="/cart"
+          className="flex items-center gap-2 px-4 py-3 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+        >
+          <div className="relative">
+          <Link
+  to="/cart"
+  className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors relative"
+>
+  <ShoppingCart className="h-5 w-5" />
+  {totalItems > 0 && (
+    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-alam-600 text-[10px] font-medium text-white">
+      {totalItems}
+    </span>
+  )}
+</Link>
+          </div>
+          <span>Cart ({totalItems})</span>
+        </Link>
+      </SheetClose>
+    </div>
               </div>
             </SheetContent>
           </Sheet>

@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Container } from "@/components/ui/Container";
@@ -19,7 +18,7 @@ const About = () => {
                 About Alam Laptop
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in opacity-0 leading-relaxed">
-                Pakistan's premier destination for quality laptops and exceptional customer service.
+                Lahore's premier destination for quality laptops and exceptional customer service.
               </p>
             </div>
           </Container>
@@ -32,13 +31,13 @@ const About = () => {
               <div className="space-y-6 animate-fade-in-left opacity-0">
                 <h2 className="text-3xl font-bold text-gray-900">Our Story</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Founded in 2010, Alam Laptop began with a simple mission: to provide Pakistani customers with high-quality laptops at fair prices, backed by exceptional service and technical expertise.
+                  Founded in 2023, Alam Laptop began with a simple mission: to provide customers in Lahore with high-quality laptops at fair prices, backed by exceptional service and technical expertise.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  What started as a small shop in Islamabad has grown into one of Pakistan's most trusted technology retailers, with a reputation for reliability, expertise, and customer satisfaction. Our journey has been driven by a passion for technology and a commitment to helping our customers find the perfect computing solutions for their needs.
+                  Based in the heart of Lahore, we've quickly established ourselves as a trusted technology retailer with a reputation for reliability and customer satisfaction. Our journey has been driven by a passion for technology and a commitment to helping our customers find the perfect computing solutions for their needs.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  Today, we continue to uphold these values while expanding our product offerings and service capabilities to meet the evolving needs of our customers across Pakistan.
+                  In just a short time, we've built strong relationships with both customers and suppliers, allowing us to offer competitive prices without compromising on quality or service.
                 </p>
               </div>
               
@@ -124,34 +123,19 @@ const About = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 stagger-animate">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 stagger-animate max-w-2xl mx-auto">
               <div className="text-center">
                 <div className="relative mx-auto w-40 h-40 rounded-full overflow-hidden mb-4">
                   <img 
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&h=300&q=80" 
-                    alt="Hassan Alam" 
+                    alt="Rana Faysal" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">Hassan Alam</h3>
+                <h3 className="text-lg font-bold text-gray-900">Rana Faysal</h3>
                 <p className="text-sm text-muted-foreground mb-2">Founder & CEO</p>
                 <p className="text-sm text-gray-700">
-                  Tech enthusiast with 15+ years of experience in the industry.
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="relative mx-auto w-40 h-40 rounded-full overflow-hidden mb-4">
-                  <img 
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&h=300&q=80" 
-                    alt="Sana Khan" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">Sana Khan</h3>
-                <p className="text-sm text-muted-foreground mb-2">Operations Manager</p>
-                <p className="text-sm text-gray-700">
-                  Ensures smooth day-to-day operations and excellent customer experience.
+                  Tech entrepreneur with a vision to bring quality computing solutions to Lahore.
                 </p>
               </div>
               
@@ -159,29 +143,14 @@ const About = () => {
                 <div className="relative mx-auto w-40 h-40 rounded-full overflow-hidden mb-4">
                   <img 
                     src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&h=300&q=80" 
-                    alt="Ali Raza" 
+                    alt="Adeel" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">Ali Raza</h3>
-                <p className="text-sm text-muted-foreground mb-2">Technical Director</p>
+                <h3 className="text-lg font-bold text-gray-900">Adeel</h3>
+                <p className="text-sm text-muted-foreground mb-2">Investor & Advisor</p>
                 <p className="text-sm text-gray-700">
-                  Expert in laptop hardware and software troubleshooting.
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="relative mx-auto w-40 h-40 rounded-full overflow-hidden mb-4">
-                  <img 
-                    src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=300&h=300&q=80" 
-                    alt="Ayesha Malik" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">Ayesha Malik</h3>
-                <p className="text-sm text-muted-foreground mb-2">Customer Relations</p>
-                <p className="text-sm text-gray-700">
-                  Dedicated to ensuring customer satisfaction and resolving concerns.
+                  Provides strategic direction and financial support for our growth.
                 </p>
               </div>
             </div>
