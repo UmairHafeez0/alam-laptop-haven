@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -6,17 +5,33 @@ import { Footer } from "@/components/layout/Footer";
 import { Container } from "@/components/ui/Container";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ProductCard } from "@/components/ui/ProductCard";
+import { ReviewsSection } from "@/components/product/ReviewsSection";
 import { getProductById, getRelatedProducts } from "@/lib/data";
 import { Check, ChevronRight, Shield, Truck } from "lucide-react";
-
+import { useCart } from "@/context/CartContext";
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedImage, setSelectedImage] = useState(0);
-  
+  const { addToCart } = useCart();
   // Get product data
   const product = id ? getProductById(id) : null;
   const relatedProducts = id ? getRelatedProducts(id, 3) : [];
-  
+  const handleWhatsAppClick = () => {
+    if (!product) return;
+    
+    // Replace with your WhatsApp number (include country code without + sign)
+    const phoneNumber = "923001234567"; // Example: 92 for Pakistan, then your number
+    
+    // Create the message
+    const message = `Hi, I'm interested in buying this product:\n\n*${product.name}*\n\nPrice: Rs. ${product.price.toLocaleString()}\n\nProduct Link: ${window.location.href}`;
+    
+    // Encode the message for URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Open WhatsApp with the message
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+  };
+
   // Redirect if product not found
   useEffect(() => {
     if (!product) {
@@ -24,7 +39,18 @@ const ProductDetail = () => {
       console.error("Product not found");
     }
   }, [product]);
-  
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      quantity: 1
+    });
+  };
+
   if (!product) {
     return (
       <div className="flex min-h-screen flex-col">
@@ -172,13 +198,23 @@ const ProductDetail = () => {
               
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <PrimaryButton size="lg" className="flex-1">
-                  Add to Cart
-                </PrimaryButton>
-                <PrimaryButton variant="outline" size="lg" className="flex-1">
-                  Buy Now
+              <PrimaryButton 
+      size="lg" 
+      className="flex-1"
+      onClick={handleAddToCart}
+    >
+      Add to Cart
+    </PrimaryButton>
+    <PrimaryButton 
+                  variant="outline" 
+                  size="lg" 
+                  className="flex-1 bg-green-100 hover:bg-green-200 text-green-800 border-green-300"
+                  onClick={handleWhatsAppClick}
+                >
+                  Buy on WhatsApp
                 </PrimaryButton>
               </div>
+              
               
               {/* Features */}
               <div className="space-y-4 mb-6">
@@ -207,6 +243,9 @@ const ProductDetail = () => {
               ))}
             </ul>
           </div>
+          
+          {/* Reviews Section */}
+          {id && <ReviewsSection productId={id} />}
           
           {/* Related Products */}
           {relatedProducts.length > 0 && (
