@@ -11,7 +11,7 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Cart from "./pages/Cart";
 import { CartProvider } from "@/context/CartContext"; // Import the CartProvider
-
+import Checkout from "./pages/Checkout"
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -29,6 +29,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/checkout" element={<Checkout />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

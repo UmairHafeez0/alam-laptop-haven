@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { PrimaryButton} from "@/components/ui/PrimaryButton";
+import { useNavigate } from "react-router-dom";
 export default function Cart() {
   const { 
     cart, 
@@ -14,6 +15,13 @@ export default function Cart() {
     totalItems, 
     totalPrice 
   } = useCart();
+  
+  const navigate = useNavigate();
+  const handleProceedToCheckout = () => {
+    if (cart.length > 0) {
+      navigate("/checkout");
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -117,7 +125,11 @@ export default function Cart() {
                     >
                       Clear Cart
                     </PrimaryButton>
-                    <PrimaryButton className="flex-1">
+                    <PrimaryButton 
+                      className="flex-1"
+                      onClick={handleProceedToCheckout}
+                      disabled={cart.length === 0}
+                    >
                       Proceed to Checkout
                     </PrimaryButton>
                   </div>
