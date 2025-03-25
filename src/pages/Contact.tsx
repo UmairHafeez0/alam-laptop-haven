@@ -71,103 +71,146 @@ const Contact = () => {
           <Container>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Contact Form */}
-              <div className="animate-fade-in-left opacity-0">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
-                
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name *
-                    </label>
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full rounded-lg border-gray-300 shadow-sm focus:border-alam-500 focus:ring-alam-500"
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address *
-                      </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full rounded-lg border-gray-300 shadow-sm focus:border-alam-500 focus:ring-alam-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number
-                      </label>
-                      <input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full rounded-lg border-gray-300 shadow-sm focus:border-alam-500 focus:ring-alam-500"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject *
-                    </label>
-                    <select
-                      id="subject"
-                      name="subject"
-                      required
-                      value={formData.subject}
-                      onChange={handleChange}
-                      className="w-full rounded-lg border-gray-300 shadow-sm focus:border-alam-500 focus:ring-alam-500"
-                    >
-                      <option value="">Select a subject</option>
-                      <option value="Sales Inquiry">Sales Inquiry</option>
-                      <option value="Product Support">Product Support</option>
-                      <option value="Warranty Claim">Warranty Claim</option>
-                      <option value="Business Partnership">Business Partnership</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                      Message *
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      rows={5}
-                      required
-                      value={formData.message}
-                      onChange={handleChange}
-                      className="w-full rounded-lg border-gray-300 shadow-sm focus:border-alam-500 focus:ring-alam-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <PrimaryButton
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full sm:w-auto"
-                    >
-                      {isSubmitting ? "Sending..." : "Send Message"}
-                    </PrimaryButton>
-                  </div>
-                </form>
-              </div>
+             {/* Contact Form */}
+<div className="animate-fade-in-left opacity-0 bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+  <h2 className="text-2xl font-bold text-gray-900 mb-6 relative pb-2">
+    Send Us a Message
+    <span className="absolute bottom-0 left-0 w-16 h-1 bg-alam-500 rounded-full"></span>
+  </h2>
+  
+  <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="relative">
+      <input
+        id="name"
+        name="name"
+        type="text"
+        required
+        value={formData.name}
+        onChange={handleChange}
+        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-alam-500 focus:ring-2 focus:ring-alam-200 transition-all duration-200 peer"
+        placeholder=" "
+      />
+      <label 
+        htmlFor="name" 
+        className="absolute left-4 top-3 text-gray-500 pointer-events-none transition-all duration-200 peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-alam-600 bg-white px-1 -top-2 text-sm text-gray-700"
+      >
+        Full Name *
+      </label>
+    </div>
+    
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="relative">
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-alam-500 focus:ring-2 focus:ring-alam-200 transition-all duration-200 peer"
+          placeholder=" "
+        />
+        <label 
+          htmlFor="email" 
+          className="absolute left-4 top-3 text-gray-500 pointer-events-none transition-all duration-200 peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-alam-600 bg-white px-1 -top-2 text-sm text-gray-700"
+        >
+          Email Address *
+        </label>
+      </div>
+      
+      <div className="relative">
+        <input
+          id="phone"
+          name="phone"
+          type="tel"
+          value={formData.phone}
+          onChange={handleChange}
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-alam-500 focus:ring-2 focus:ring-alam-200 transition-all duration-200 peer"
+          placeholder=" "
+        />
+        <label 
+          htmlFor="phone" 
+          className="absolute left-4 top-3 text-gray-500 pointer-events-none transition-all duration-200 peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-alam-600 bg-white px-1 -top-2 text-sm text-gray-700"
+        >
+          Phone Number
+        </label>
+      </div>
+    </div>
+    
+    <div className="relative">
+      <select
+        id="subject"
+        name="subject"
+        required
+        value={formData.subject}
+        onChange={handleChange}
+        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-alam-500 focus:ring-2 focus:ring-alam-200 transition-all duration-200 appearance-none bg-white"
+      >
+        <option value="">Select a subject</option>
+        <option value="Sales Inquiry">Sales Inquiry</option>
+        <option value="Product Support">Product Support</option>
+        <option value="Warranty Claim">Warranty Claim</option>
+        <option value="Business Partnership">Business Partnership</option>
+        <option value="Other">Other</option>
+      </select>
+      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+        <svg className="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+        </svg>
+      </div>
+      <label 
+        htmlFor="subject" 
+        className="absolute left-4 -top-2 text-sm text-gray-700 bg-white px-1"
+      >
+        Subject *
+      </label>
+    </div>
+    
+    <div className="relative">
+      <textarea
+        id="message"
+        name="message"
+        rows={5}
+        required
+        value={formData.message}
+        onChange={handleChange}
+        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-alam-500 focus:ring-2 focus:ring-alam-200 transition-all duration-200 peer"
+        placeholder=" "
+      />
+      <label 
+        htmlFor="message" 
+        className="absolute left-4 top-3 text-gray-500 pointer-events-none transition-all duration-200 peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-alam-600 bg-white px-1 -top-2 text-sm text-gray-700"
+      >
+        Message *
+      </label>
+    </div>
+    
+    <div className="pt-2">
+      <PrimaryButton
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full py-3 px-6 flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg"
+      >
+        {isSubmitting ? (
+          <>
+            <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Sending...
+          </>
+        ) : (
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+            </svg>
+            Send Message
+          </>
+        )}
+      </PrimaryButton>
+    </div>
+  </form>
+</div>
               
               {/* Contact Information */}
               <div className="animate-fade-in-right opacity-0">
