@@ -7,13 +7,15 @@ import { Laptop, Search, ShoppingCart, Menu, X } from 'lucide-react';
 import { 
   Sheet, 
   SheetContent, 
-  SheetTrigger 
+  SheetTrigger,
+  SheetClose
 } from '@/components/ui/sheet';
 import { 
   Popover, 
   PopoverContent, 
   PopoverTrigger, 
 } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 const NavLinks = [
   { name: 'Home', path: '/' },
@@ -25,7 +27,9 @@ const NavLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileSearchFocused, setMobileSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -52,7 +56,7 @@ export function Navbar() {
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out',
-        isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-white md:bg-transparent'
+        isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-white'
       )}
     >
       <Container>
@@ -86,14 +90,16 @@ export function Navbar() {
             {/* Search Popover for Desktop */}
             <Popover>
               <PopoverTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   aria-label="Search"
-                  className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                  className="rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   <Search className="h-5 w-5" />
-                </button>
+                </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-0" align="end">
+              <PopoverContent className="w-80 p-0" align="end" sideOffset={8}>
                 <form onSubmit={handleSearch} className="flex items-center">
                   <input
                     ref={searchInputRef}
@@ -104,12 +110,13 @@ export function Navbar() {
                     className="w-full px-4 py-2 outline-none border-0 focus:ring-0"
                     autoFocus
                   />
-                  <button 
+                  <Button 
                     type="submit" 
+                    variant="ghost"
                     className="p-2 bg-alam-600 text-white rounded-r-md hover:bg-alam-700 transition-colors"
                   >
                     <Search className="h-5 w-5" />
-                  </button>
+                  </Button>
                 </form>
               </PopoverContent>
             </Popover>
@@ -128,36 +135,80 @@ export function Navbar() {
           {/* Mobile Menu Sheet */}
           <Sheet>
             <SheetTrigger asChild>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 aria-label="Open Menu"
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors md:hidden"
+                className="rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors md:hidden"
               >
                 <Menu className="h-5 w-5" />
-              </button>
+              </Button>
             </SheetTrigger>
             <SheetContent side="right" className="bg-white w-full sm:max-w-sm p-0">
               <div className="flex flex-col h-full">
+                {/* Mobile Close Button */}
+                <div className="absolute right-4 top-4">
+                  <SheetClose asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      aria-label="Close" 
+                      className="rounded-full hover:bg-gray-100"
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </SheetClose>
+                </div>
+
+                {/* Mobile Logo */}
+                <div className="pt-4 pl-4 pb-5">
+                  <Link to="/" className="flex items-center gap-2">
+                    <Laptop className="h-6 w-6 text-alam-600" />
+                    <span className="text-xl font-semibold text-gray-900">Alam Laptop</span>
+                  </Link>
+                </div>
+                
                 {/* Mobile Search */}
-                <div className="p-4 border-b">
-                  <form onSubmit={handleSearch} className="flex items-center">
+                <div className="px-4 pb-4">
+                  <form 
+                    onSubmit={(e) => {
+                      handleSearch(e);
+                      // Close the sheet after search submission
+                      document.querySelector('.sheet-close-button')?.dispatchEvent(
+                        new MouseEvent('click', { bubbles: true })
+                      );
+                    }} 
+                    className={cn(
+                      "flex items-center w-full transition-all duration-200 overflow-hidden",
+                      "bg-gray-50 border rounded-md focus-within:border-alam-500 focus-within:ring-1 focus-within:ring-alam-500"
+                    )}
+                  >
                     <input
+                      ref={mobileSearchInputRef}
                       type="text"
                       placeholder="Search laptops..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-4 py-2 rounded-l-md border-y border-l border-gray-300 focus:outline-none focus:ring-1 focus:ring-alam-500"
+                      onFocus={() => setMobileSearchFocused(true)}
+                      onBlur={() => setMobileSearchFocused(false)}
+                      className="w-full px-4 py-2.5 bg-transparent border-none outline-none text-gray-900"
                     />
-                    <button 
+                    <Button 
                       type="submit" 
-                      className="p-2 bg-alam-600 text-white rounded-r-md hover:bg-alam-700 transition-colors border border-alam-600"
+                      size="icon"
+                      variant="ghost"
+                      className={cn(
+                        "p-2 text-gray-500 rounded-r-md transition-colors",
+                        mobileSearchFocused ? "text-alam-600" : ""
+                      )}
                     >
                       <Search className="h-5 w-5" />
-                    </button>
+                    </Button>
                   </form>
                 </div>
                 
                 {/* Mobile Navigation Links */}
-                <nav className="flex flex-col gap-1 p-4">
+                <nav className="flex flex-col gap-1 px-4">
                   {NavLinks.map((link) => (
                     <Link
                       key={link.path}
