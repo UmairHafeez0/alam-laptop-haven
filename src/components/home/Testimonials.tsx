@@ -1,4 +1,3 @@
-
 import { Container } from "@/components/ui/Container";
 
 const testimonials = [
@@ -6,21 +5,22 @@ const testimonials = [
     quote: "Buying a laptop from Alam was the best decision. Their expert advice helped me find the perfect machine for my design work. The service was exceptional!",
     author: "Sara Ahmed",
     role: "Graphic Designer",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=256&h=256&q=80",
   },
   {
     quote: "As a gamer, I needed something powerful but within my budget. Alam Laptop had exactly what I wanted. Fast delivery and great after-sales support!",
     author: "Faizan Khan",
     role: "Software Engineer",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=256&h=256&q=80",
   },
   {
     quote: "I've been buying laptops from Alam for my company for years. Their business laptops are reliable, and their service is always professional and prompt.",
     author: "Ayesha Malik",
     role: "Business Owner",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&h=256&q=80",
   },
 ];
+
+function getInitials(name: string) {
+  return name.split(' ').map(part => part[0]).join('').toUpperCase();
+}
 
 export function Testimonials() {
   return (
@@ -51,11 +51,11 @@ export function Testimonials() {
               </div>
               
               <div className="flex items-center gap-4">
-                <img 
-                  src={testimonial.image} 
-                  alt={testimonial.author}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
+                <div className="h-12 w-12 rounded-full bg-alam-100 flex items-center justify-center">
+                  <span className="text-alam-800 font-medium">
+                    {getInitials(testimonial.author)}
+                  </span>
+                </div>
                 <div>
                   <h4 className="font-medium text-gray-900">{testimonial.author}</h4>
                   <p className="text-sm text-muted-foreground">{testimonial.role}</p>

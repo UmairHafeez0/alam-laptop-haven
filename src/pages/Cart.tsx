@@ -5,7 +5,6 @@ import { Footer } from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
 
-export default function Cart() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -23,24 +22,10 @@ export default function Cart() {
               </Link>
             </div>
 
-            {/* Empty cart state */}
-            <div className="text-center py-16 border rounded-lg bg-gray-50">
-              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <ShoppingCart className="h-8 w-8 text-gray-400" />
-              </div>
-              <h2 className="text-xl font-medium text-gray-900 mb-2">Your cart is empty</h2>
-              <p className="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
-              <Link 
-                to="/products" 
-                className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-alam-600 hover:bg-alam-700"
-              >
-                Browse Products
-              </Link>
-            </div>
+
           </div>
         </Container>
       </main>
       <Footer />
     </div>
   );
-}
