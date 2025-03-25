@@ -20,6 +20,7 @@ import AdminReviewManagement from "./pages/admin/AdminReviewManagement";
 import AdminLayout from "./components/admin/AdminLayout";
 import { AdminAuthProvider } from "./context/AdminAuthContext";
 import AdminOrderManagement from "./pages/admin/AdminOrderManagement";
+import SupportWidget from "./components/SupportWidget";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -56,6 +57,7 @@ const App = () => (
             
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <SupportWidget />
         </BrowserRouter>
       </CartProvider>
     </TooltipProvider>
