@@ -8,6 +8,7 @@ import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import Cart from "./pages/Cart";
 import { CartProvider } from "@/context/CartContext";
@@ -24,42 +25,7 @@ import SupportWidget from "./components/SupportWidget";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/checkout" element={<Checkout />} />
-            
-            {/* Admin routes */}
-            <Route path="/admin/login" element={
-              <AdminAuthProvider>
-                <AdminLogin />
-              </AdminAuthProvider>
-            } />
-            
-            <Route path="/admin" element={
-              <AdminAuthProvider>
-                <AdminLayout />
-              </AdminAuthProvider>
-            }>
-              <Route index element={<AdminDashboard />} />
-              <Route path="products" element={<AdminProductManagement />} />
-              <Route path="reviews" element={<AdminReviewManagement />} />
-              <Route path="orders" element={<AdminOrderManagement />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <SupportWidget />
-        </BrowserRouter>
-      </CartProvider>
+
     </TooltipProvider>
   </QueryClientProvider>
 );
