@@ -8,11 +8,11 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import { ReviewsSection } from "@/components/product/ReviewsSection";
 import { getProductById, getRelatedProducts } from "@/lib/data";
 import { Check, ChevronRight, Shield, Truck } from "lucide-react";
-
+import { useCart } from "@/context/CartContext";
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedImage, setSelectedImage] = useState(0);
-  
+  const { addToCart } = useCart();
   // Get product data
   const product = id ? getProductById(id) : null;
   const relatedProducts = id ? getRelatedProducts(id, 3) : [];
@@ -24,7 +24,18 @@ const ProductDetail = () => {
       console.error("Product not found");
     }
   }, [product]);
-  
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      quantity: 1
+    });
+  };
+
   if (!product) {
     return (
       <div className="flex min-h-screen flex-col">
@@ -172,9 +183,13 @@ const ProductDetail = () => {
               
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <PrimaryButton size="lg" className="flex-1">
-                  Add to Cart
-                </PrimaryButton>
+              <PrimaryButton 
+      size="lg" 
+      className="flex-1"
+      onClick={handleAddToCart}
+    >
+      Add to Cart
+    </PrimaryButton>
                 <PrimaryButton variant="outline" size="lg" className="flex-1">
                   Buy Now
                 </PrimaryButton>
