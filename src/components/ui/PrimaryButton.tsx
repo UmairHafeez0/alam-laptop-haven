@@ -1,14 +1,14 @@
-
 import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface PrimaryButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "outline" | "ghost" | "secondary";
   size?: "default" | "sm" | "lg" | "icon";
+  loading?: boolean; // Added loading prop
 }
 
 const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
-  ({ className, variant = "default", size = "default", children, ...props }, ref) => {
+  ({ className, variant = "default", size = "default", children, loading, ...props }, ref) => {
     return (
       <button
         className={cn(
@@ -29,9 +29,10 @@ const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
           className
         )}
         ref={ref}
+        disabled={loading || props.disabled} // Ensure button is disabled when loading
         {...props}
       >
-        {children}
+        {loading ? "Loading..." : children} {/* Show loading text when loading */}
       </button>
     );
   }

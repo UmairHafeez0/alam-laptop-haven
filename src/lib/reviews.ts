@@ -38,4 +38,19 @@ export interface Review {
       }
     ];
   };
+  export const submitReview = async (review: Omit<Review, 'id' | 'date' | 'userName' | 'isVerified'> & { content: string }): Promise<Review> => {
+    // Simulate server processing delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  
+    return {
+      id: Date.now().toString(), // Generate a unique ID
+      productId: review.productId,
+      userName: "Anonymous User", // In a real app, fetch the user's name
+      rating: review.rating,
+      date: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+      title: "User Review",
+      content: review.content, // Use content instead of text
+      isVerified: true,
+    };
+  };
   

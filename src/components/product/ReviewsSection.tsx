@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Review, fetchReviews } from '@/lib/reviews';
+import { Review, fetchReviews, submitReview } from '@/lib/reviews';
 import { ReviewCard } from '@/components/ui/ReviewCard';
 import { StarRating } from '@/components/ui/StarRating';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { Modal } from '@/components/ui/Modal';
+import { Input } from '@/components/ui/Input';
+import { verifyOrder } from '@/lib/orders';
 
 interface ReviewsSectionProps {
   productId: string;
@@ -12,7 +15,15 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ productId }) => 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [orderId, setOrderId] = useState('');
+  const [verificationLoading, setVerificationLoading] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewRating, setReviewRating] = useState(0);
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   useEffect(() => {
     const loadReviews = async () => {
       try {
@@ -31,11 +42,67 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ productId }) => 
     loadReviews();
   }, [productId]);
   
-  // Calculate average rating
   const averageRating = reviews.length > 0 
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
     : 0;
-  
+
+  const handleVerifyOrder = async () => {
+    if (!orderId.trim()) {
+      setVerificationError('Please enter a valid order ID');
+      return;
+    }
+
+    try {
+      setVerificationLoading(true);
+      setVerificationError(null);
+      const verificationResult = await verifyOrder(orderId, productId);
+      
+      if (verificationResult.valid) {
+        setIsVerified(true);
+      } else {
+        setVerificationError(verificationResult.message || 'This order is not eligible for reviewing this product');
+      }
+    } catch (err) {
+      setVerificationError('Failed to verify order. Please try again later.');
+      console.error('Error verifying order:', err);
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewText.trim() || reviewRating === 0) {
+      setVerificationError('Please provide both a rating and review text');
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      const newReview = await submitReview({
+        productId,
+        rating: reviewRating,
+        content: reviewText,
+        title: "User Review", // ✅ Provide a default or user-inputted title
+      });
+      setReviews([newReview, ...reviews]);
+      resetReviewForm();
+    } catch (err) {
+      setVerificationError('Failed to submit review. Please try again.');
+      console.error('Error submitting review:', err);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const resetReviewForm = () => {
+    setShowReviewForm(false);
+    setOrderId('');
+    setIsVerified(false);
+    setReviewText('');
+    setReviewRating(0);
+    setVerificationError(null);
+  };
+
   return (
     <div className="mt-16">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
@@ -67,7 +134,10 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ productId }) => 
               <p className="text-gray-700 mb-4">
                 Share your thoughts with other customers
               </p>
-              <PrimaryButton className="w-full md:w-auto">
+              <PrimaryButton 
+                onClick={() => setShowReviewForm(true)}
+                className="w-full md:w-auto"
+              >
                 Write a Review
               </PrimaryButton>
             </div>
@@ -87,6 +157,79 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ productId }) => 
           </div>
         </>
       )}
+
+      {/* Review Form Modal */}
+      <Modal 
+        isOpen={showReviewForm} 
+        onClose={resetReviewForm}
+        title={isVerified ? "Write Your Review" : "Verify Your Purchase"}
+      >
+        {!isVerified ? (
+          <div className="space-y-4">
+            <p className="text-gray-700">
+              To ensure authentic reviews, please verify your purchase by entering your Order ID.
+            </p>
+            <Input
+              label="Order ID"
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+              placeholder="Enter your order ID"
+            />
+            {verificationError && (
+              <p className="text-red-500 text-sm">{verificationError}</p>
+            )}
+            <div className="flex justify-end gap-3 pt-2">
+              <PrimaryButton
+                onClick={handleVerifyOrder}
+                loading={verificationLoading}
+                disabled={verificationLoading}
+              >
+                Verify Order
+              </PrimaryButton>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Your Rating
+              </label>
+              <StarRating 
+                rating={reviewRating} 
+                onRatingChange={setReviewRating}
+                interactive={true}
+                size="lg"
+              />
+            </div>
+            <Input
+              label="Your Review"
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+              placeholder="Share your experience with this product..."
+              multiline
+              rows={4}
+            />
+            {verificationError && (
+              <p className="text-red-500 text-sm">{verificationError}</p>
+            )}
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={resetReviewForm}
+                className="px-4 py-2 text-gray-700 rounded hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <PrimaryButton
+                onClick={handleSubmitReview}
+                loading={submittingReview}
+                disabled={submittingReview}
+              >
+                Submit Review
+              </PrimaryButton>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
