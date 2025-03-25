@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -6,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Container } from "@/components/ui/Container";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ProductCard } from "@/components/ui/ProductCard";
+import { ReviewsSection } from "@/components/product/ReviewsSection";
 import { getProductById, getRelatedProducts } from "@/lib/data";
 import { Check, ChevronRight, Shield, Truck } from "lucide-react";
 
@@ -207,6 +207,9 @@ const ProductDetail = () => {
               ))}
             </ul>
           </div>
+          
+          {/* Reviews Section */}
+          {id && <ReviewsSection productId={id} />}
           
           {/* Related Products */}
           {relatedProducts.length > 0 && (
