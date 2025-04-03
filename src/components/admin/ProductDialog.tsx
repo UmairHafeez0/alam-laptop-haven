@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { X, Plus, Trash2, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Product } from '@/lib/data';
+import { Product } from '@/lib/types';
 
 interface ProductDialogProps {
   isOpen: boolean;
@@ -10,6 +10,9 @@ interface ProductDialogProps {
   onSave: (product: Product) => void;
   product: Product | null;
   mode: 'add' | 'edit';
+  onImageUpload: (file: File) => Promise<string | null>;
+  onImageDelete: (imageUrl: string) => Promise<boolean>;
+  imageUploading: boolean;
 }
 
 export const ProductDialog: React.FC<ProductDialogProps> = ({
@@ -17,7 +20,10 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
   onClose,
   onSave,
   product,
-  mode
+  mode,
+  onImageUpload,
+  onImageDelete,
+  imageUploading
 }) => {
   const [formData, setFormData] = useState<Partial<Product>>(
     product || {
@@ -49,7 +55,10 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
 
   useEffect(() => {
     if (product) {
-      setFormData(product);
+      setFormData({
+        ...product,
+        image: product.image || (product.images && product.images.length > 0 ? product.images[0] : '')
+      });
     }
   }, [product]);
 
@@ -69,7 +78,12 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
   const handleImageChange = (index: number, value: string) => {
     const newImages = [...(formData.images || [''])];
     newImages[index] = value;
-    setFormData(prev => ({ ...prev, images: newImages }));
+    setFormData(prev => ({ 
+      ...prev, 
+      images: newImages,
+      // Update main image if changing the first image
+      image: index === 0 ? value : prev.image
+    }));
   };
 
   const addImageField = () => {
@@ -79,10 +93,24 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
     }));
   };
 
-  const removeImageField = (index: number) => {
+  const removeImageField = async (index: number) => {
+    const imageToRemove = formData.images?.[index] || '';
+    const isUrl = imageToRemove.startsWith('http');
+    
+    if (isUrl) {
+      const success = await onImageDelete(imageToRemove);
+      if (!success) return;
+    }
+    
     const newImages = [...(formData.images || [''])];
     newImages.splice(index, 1);
-    setFormData(prev => ({ ...prev, images: newImages }));
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      images: newImages,
+      // Update main image if removing the first image
+      image: index === 0 ? (newImages.length > 0 ? newImages[0] : '') : prev.image
+    }));
   };
 
   const handleFeatureChange = (index: number, value: string) => {
@@ -107,15 +135,17 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     if (!formData.name || !formData.brand || !formData.price) {
       alert('Please fill in all required fields');
       return;
     }
     
-    // Generate slug if empty
+    const images = formData.images || [];
+    const mainImage = formData.image || (images.length > 0 ? images[0] : '');
+    
     const productData = {
       ...formData,
+      image: mainImage,
       slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
     } as Product;
     
@@ -406,21 +436,50 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
               rows={4}
             />
           </div>
-          
+
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium text-gray-700">
                 Product Images
               </label>
-              <button
-                type="button"
-                onClick={addImageField}
-                className="flex items-center text-sm text-alam-600 hover:text-alam-800"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Image
-              </button>
+              <div className="flex space-x-2">
+                <label className="flex items-center text-sm text-alam-600 hover:text-alam-800 cursor-pointer">
+                  <Upload className="h-4 w-4 mr-1" />
+                  Upload Image
+                  <input 
+                    type="file" 
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const imageUrl = await onImageUpload(file);
+                        if (imageUrl) {
+                          const newImages = [...(formData.images || []), imageUrl];
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            images: newImages,
+                            image: prev.image || imageUrl
+                          }));
+                        }
+                      }
+                    }}
+                    disabled={imageUploading}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={addImageField}
+                  className="flex items-center text-sm text-alam-600 hover:text-alam-800"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add URL
+                </button>
+              </div>
             </div>
+            
+            {imageUploading && (
+              <div className="mb-2 text-sm text-gray-500">Uploading image...</div>
+            )}
             
             {(formData.images || []).map((image, index) => (
               <div key={index} className="flex items-center mb-2">
@@ -430,15 +489,14 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
                   placeholder="Enter image URL"
                   className="flex-1"
                 />
-                {index > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImageField(index)}
-                    className="ml-2 text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => removeImageField(index)}
+                  className="ml-2 text-red-600 hover:text-red-800"
+                  disabled={imageUploading}
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
               </div>
             ))}
           </div>

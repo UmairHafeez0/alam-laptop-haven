@@ -21,6 +21,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import { AdminAuthProvider } from "./context/AdminAuthContext";
 import AdminOrderManagement from "./pages/admin/AdminOrderManagement";
 import SupportWidget from "./components/SupportWidget";
+import AdminImageManagement from "./pages/admin/AdminImageManagement";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="products" element={<AdminProductManagement />} />
               <Route path="reviews" element={<AdminReviewManagement />} />
               <Route path="orders" element={<AdminOrderManagement />} />
+              <Route path="image" element={<AdminImageManagement/>}/>
             </Route>
             
             <Route path="*" element={<NotFound />} />
