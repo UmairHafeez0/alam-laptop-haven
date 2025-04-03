@@ -25,7 +25,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const { id, name, image, price, originalPrice, processor, ram, storage, display, isNew, isFeatured } = product;
   
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
-  
+
   return (
     <Link 
       to={`/products/${id}`}
@@ -36,6 +36,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       )}
     >
       {/* Image Container */}
+      
       <div className="relative aspect-square overflow-hidden bg-gray-50 p-4">
         <img
           src={image}

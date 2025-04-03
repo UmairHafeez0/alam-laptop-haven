@@ -9,36 +9,50 @@ import { ReviewsSection } from "@/components/product/ReviewsSection";
 import { getProductById, getRelatedProducts } from "@/lib/data";
 import { Check, ChevronRight, Shield, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { Product } from "@/lib/types";
+
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedImage, setSelectedImage] = useState(0);
   const { addToCart } = useCart();
+  
   // Get product data
-  const product = id ? getProductById(id) : null;
-  const relatedProducts = id ? getRelatedProducts(id, 3) : [];
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const productData = await getProductById(id);
+        setProduct(productData);
+        
+        if (productData) {
+          const related = await getRelatedProducts(id, 3);
+          setRelatedProducts(related);
+        }
+      } catch (error) {
+        console.error("Error fetching product data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [id]);
+
   const handleWhatsAppClick = () => {
     if (!product) return;
     
-    // Replace with your WhatsApp number (include country code without + sign)
-    const phoneNumber = "923001234567"; // Example: 92 for Pakistan, then your number
-    
-    // Create the message
+    const phoneNumber = "923001234567";
     const message = `Hi, I'm interested in buying this product:\n\n*${product.name}*\n\nPrice: Rs. ${product.price.toLocaleString()}\n\nProduct Link: ${window.location.href}`;
-    
-    // Encode the message for URL
     const encodedMessage = encodeURIComponent(message);
-    
-    // Open WhatsApp with the message
     window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
 
-  // Redirect if product not found
-  useEffect(() => {
-    if (!product) {
-      // Could redirect to 404 page
-      console.error("Product not found");
-    }
-  }, [product]);
   const handleAddToCart = () => {
     if (!product) return;
     
@@ -50,6 +64,22 @@ const ProductDetail = () => {
       quantity: 1
     });
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-grow pt-24 pb-16">
+          <Container>
+            <div className="text-center py-12">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Loading Product...</h1>
+            </div>
+          </Container>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -111,7 +141,7 @@ const ProductDetail = () => {
                     key={index}
                     className={`relative aspect-square w-20 cursor-pointer overflow-hidden rounded-lg border-2 transition ${
                       selectedImage === index
-                        ? "border-alam-600"
+                        ? "border-primary-600"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                     onClick={() => setSelectedImage(index)}
@@ -131,14 +161,15 @@ const ProductDetail = () => {
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {product.isNew && (
-                  <span className="inline-flex items-center rounded-full bg-alam-500 px-2.5 py-1 text-xs font-medium text-white">
+                  <span className="inline-flex items-center rounded-full bg-primary-500 px-2.5 py-1 text-xs font-medium text-white">
                     New
                   </span>
                 )}
                 {product.originalPrice && (
                   <span className="inline-flex items-center rounded-full bg-red-500 px-2.5 py-1 text-xs font-medium text-white">
-                    {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% Off
-                  </span>
+  {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% Off
+</span>
+
                 )}
                 <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
                   product.status === "In Stock" 
@@ -153,6 +184,7 @@ const ProductDetail = () => {
               
               {/* Title & Price */}
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <p className="text-lg text-gray-600 mb-2">{product.brand}</p>
               
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-2xl font-bold text-gray-900">
@@ -186,26 +218,49 @@ const ProductDetail = () => {
                   <span className="text-sm font-medium text-gray-500">Display</span>
                   <p className="mt-1 text-sm text-gray-900">{product.display}</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-4">
-                  <span className="text-sm font-medium text-gray-500">Graphics</span>
-                  <p className="mt-1 text-sm text-gray-900">{product.graphics}</p>
-                </div>
-                <div className="rounded-lg bg-gray-50 p-4">
-                  <span className="text-sm font-medium text-gray-500">Battery</span>
-                  <p className="mt-1 text-sm text-gray-900">{product.battery}</p>
-                </div>
+                {product.graphics && (
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <span className="text-sm font-medium text-gray-500">Graphics</span>
+                    <p className="mt-1 text-sm text-gray-900">{product.graphics}</p>
+                  </div>
+                )}
+                {product.battery && (
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <span className="text-sm font-medium text-gray-500">Battery</span>
+                    <p className="mt-1 text-sm text-gray-900">{product.battery}</p>
+                  </div>
+                )}
+                {product.weight && (
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <span className="text-sm font-medium text-gray-500">Weight</span>
+                    <p className="mt-1 text-sm text-gray-900">{product.weight}</p>
+                  </div>
+                )}
+                {product.ports && (
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <span className="text-sm font-medium text-gray-500">Ports</span>
+                    <p className="mt-1 text-sm text-gray-900">{product.ports}</p>
+                  </div>
+                )}
+                {product.os && (
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <span className="text-sm font-medium text-gray-500">Operating System</span>
+                    <p className="mt-1 text-sm text-gray-900">{product.os}</p>
+                  </div>
+                )}
               </div>
               
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <PrimaryButton 
-      size="lg" 
-      className="flex-1"
-      onClick={handleAddToCart}
-    >
-      Add to Cart
-    </PrimaryButton>
-    <PrimaryButton 
+                <PrimaryButton 
+                  size="lg" 
+                  className="flex-1"
+                  onClick={handleAddToCart}
+                  disabled={product.status !== "In Stock"}
+                >
+                  {product.status === "In Stock" ? "Add to Cart" : product.status}
+                </PrimaryButton>
+                <PrimaryButton 
                   variant="outline" 
                   size="lg" 
                   className="flex-1 bg-green-100 hover:bg-green-200 text-green-800 border-green-300"
@@ -215,15 +270,14 @@ const ProductDetail = () => {
                 </PrimaryButton>
               </div>
               
-              
               {/* Features */}
               <div className="space-y-4 mb-6">
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Truck className="h-5 w-5 text-alam-600" />
+                  <Truck className="h-5 w-5 text-primary-600" />
                   <span>Free delivery across Pakistan on orders over Rs. 30,000</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Shield className="h-5 w-5 text-alam-600" />
+                  <Shield className="h-5 w-5 text-primary-600" />
                   <span>{product.warranty} with nationwide service centers</span>
                 </div>
               </div>
@@ -237,7 +291,7 @@ const ProductDetail = () => {
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mb-12">
               {product.features.map((feature, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-alam-600 flex-shrink-0 mt-0.5" />
+                  <Check className="h-5 w-5 text-primary-600 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">{feature}</span>
                 </li>
               ))}
@@ -254,7 +308,7 @@ const ProductDetail = () => {
                 <h2 className="text-2xl font-bold text-gray-900">Related Products</h2>
                 <Link 
                   to="/products" 
-                  className="text-alam-600 font-medium hover:text-alam-700 hover:underline"
+                  className="text-primary-600 font-medium hover:text-primary-700 hover:underline"
                 >
                   View all
                 </Link>

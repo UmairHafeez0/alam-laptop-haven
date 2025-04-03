@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -7,7 +6,7 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import { ProductFilters, MobileFilters } from "@/components/products/ProductFilters";
 import { filterProducts, getFilterCategories } from "@/lib/data";
 import { ArrowDown01, ArrowDown10, ArrowUpDown, ListFilter } from "lucide-react";
-
+import {Product} from "@/lib/types"
 // Sorting options
 const sortOptions = [
   { value: "price-low", label: "Price: Low to High", icon: ArrowDown01 },
@@ -16,28 +15,41 @@ const sortOptions = [
 ];
 
 const Products = () => {
-  const [products, setProducts] = useState(filterProducts({}));
+  const [products, setProducts] = useState<Product[]>([]); // Initialize as empty array
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
   const [sortBy, setSortBy] = useState("featured");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const filterCategories = getFilterCategories();
   
-  // Apply filters when activeFilters change
+  // Load products initially and when filters/sort change
   useEffect(() => {
-    const filteredProducts = filterProducts(activeFilters);
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const filteredProducts = await filterProducts(activeFilters);
+        
+        // Sort products
+        let sortedProducts = [...filteredProducts];
+        
+        if (sortBy === "price-low") {
+          sortedProducts.sort((a, b) => a.price - b.price);
+        } else if (sortBy === "price-high") {
+          sortedProducts.sort((a, b) => b.price - a.price);
+        } else if (sortBy === "name") {
+          sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
+        }
+        
+        setProducts(sortedProducts);
+      } catch (error) {
+        console.error("Error loading products:", error);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // Sort products
-    let sortedProducts = [...filteredProducts];
-    
-    if (sortBy === "price-low") {
-      sortedProducts.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "price-high") {
-      sortedProducts.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "name") {
-      sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
-    }
-    
-    setProducts(sortedProducts);
+    loadProducts();
   }, [activeFilters, sortBy]);
   
   return (
@@ -117,7 +129,11 @@ const Products = () => {
               </div>
               
               {/* Products */}
-              {products.length === 0 ? (
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <p>Loading products...</p>
+                </div>
+              ) : products.length === 0 ? (
                 <div className="text-center py-12">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
                   <p className="text-muted-foreground">
