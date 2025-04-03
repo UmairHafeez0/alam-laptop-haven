@@ -1,13 +1,49 @@
-
 import { Container } from "@/components/ui/Container";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Link } from "react-router-dom";
 import { getFeaturedProducts } from "@/lib/data";
+import {Product} from "@/lib/types"
+import { useEffect, useState } from "react";
 
 export function FeaturedProducts() {
-  const featuredProducts = getFeaturedProducts(4);
-  
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        setLoading(true);
+        const products = await getFeaturedProducts(4);
+        setFeaturedProducts(products);
+      } catch (err) {
+        console.error("Failed to fetch featured products:", err);
+        setError("Failed to load featured products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <Container>Loading featured products...</Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <Container>{error}</Container>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-gradient-to-b from-white to-gray-50">
       <Container>

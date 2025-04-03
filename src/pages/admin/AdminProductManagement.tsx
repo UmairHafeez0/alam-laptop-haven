@@ -5,10 +5,9 @@ import {
   Trash2, 
   Search, 
   X,
-  Check,
   ChevronDown,
   ChevronUp,
-  Filter
+  Upload
 } from 'lucide-react';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Input } from '@/components/ui/input';
@@ -23,9 +22,14 @@ import {
 import { ProductDialog } from '@/components/admin/ProductDialog';
 import { 
   getAllProducts,
-  getProductById
+  getProductById,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  uploadProductImage,
+  deleteProductImage
 } from '@/lib/data';
-import { Product } from '@/lib/data';
+import { Product } from '@/lib/types';
 import { toast } from 'sonner';
 
 const AdminProductManagement: React.FC = () => {
@@ -35,12 +39,25 @@ const AdminProductManagement: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [deleteConfirmProduct, setDeleteConfirmProduct] = useState<Product | null>(null);
-  const [sortField, setSortField] = useState<keyof Product>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortField, setSortField] = useState<keyof Product>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageUploading, setImageUploading] = useState(false);
 
   useEffect(() => {
-    // Load products
-    setProducts(getAllProducts());
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const products = await getAllProducts();
+        setProducts(products);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        toast.error('Failed to load products');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadProducts();
   }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,11 +80,20 @@ const AdminProductManagement: React.FC = () => {
     setDeleteConfirmProduct(product);
   };
 
-  const handleDelete = (productId: string) => {
-    // In a real app, this would make an API call to delete the product
-    setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
-    setDeleteConfirmProduct(null);
-    toast.success('Product deleted successfully');
+  const handleDelete = async (productId: string) => {
+    try {
+      const success = await deleteProduct(productId);
+      if (success) {
+        setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
+        setDeleteConfirmProduct(null);
+        toast.success('Product deleted successfully');
+      } else {
+        toast.error('Failed to delete product');
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
+    }
   };
 
   const handleSort = (field: keyof Product) => {
@@ -79,22 +105,74 @@ const AdminProductManagement: React.FC = () => {
     }
   };
 
-  const handleSaveProduct = (updatedProduct: Product) => {
-    if (dialogMode === 'add') {
-      // In a real app, this would make an API call to add the product
-      setProducts(prevProducts => [...prevProducts, { 
-        ...updatedProduct,
-        id: String(prevProducts.length + 1), // Simple ID generation
-      }]);
-      toast.success('Product added successfully');
-    } else {
-      // In a real app, this would make an API call to update the product
-      setProducts(prevProducts => 
-        prevProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p)
-      );
-      toast.success('Product updated successfully');
+  const handleImageUpload = async (file: File): Promise<string | null> => {
+    setImageUploading(true);
+    try {
+      // For new products, generate a temporary ID
+      const productId = editingProduct?.id || `temp-${Date.now()}`;
+      const imageUrl = await uploadProductImage(file, productId);
+      if (!imageUrl) {
+        toast.error('Failed to upload image');
+        return null;
+      }
+      return imageUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+      return null;
+    } finally {
+      setImageUploading(false);
     }
-    setIsDialogOpen(false);
+  };
+
+  const handleImageDelete = async (imageUrl: string): Promise<boolean> => {
+    try {
+      const success = await deleteProductImage(imageUrl);
+      if (!success) {
+        toast.error('Failed to delete image');
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Failed to delete image');
+      return false;
+    }
+  };
+
+  const handleSaveProduct = async (productData: Product) => {
+    try {
+      if (dialogMode === 'add') {
+        const newProduct = await addProduct(productData);
+        if (newProduct) {
+          setProducts(prevProducts => [newProduct, ...prevProducts]);
+          toast.success('Product added successfully');
+        }
+      } else {
+        const updatedProduct = await updateProduct(productData.id, productData);
+        if (updatedProduct) {
+          setProducts(prevProducts => 
+            prevProducts.map(p => p.id === productData.id ? updatedProduct : p)
+          );
+          toast.success('Product updated successfully');
+        }
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      toast.error('Failed to save product');
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // Filter and sort products
@@ -108,11 +186,17 @@ const AdminProductManagement: React.FC = () => {
       const aValue = a[sortField];
       const bValue = b[sortField];
       
+      if (aValue instanceof Date && bValue instanceof Date) {
+        return sortDirection === 'asc' 
+          ? aValue.getTime() - bValue.getTime()
+          : bValue.getTime() - aValue.getTime();
+      }
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === 'asc' 
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
-      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+      } 
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
         return sortDirection === 'asc' 
           ? aValue - bValue
           : bValue - aValue;
@@ -211,19 +295,40 @@ const AdminProductManagement: React.FC = () => {
                     )}
                   </div>
                 </TableHead>
+                <TableHead 
+                  className="cursor-pointer"
+                  onClick={() => handleSort('created_at')}
+                >
+                  <div className="flex items-center">
+                    Created
+                    {sortField === 'created_at' && (
+                      sortDirection === 'asc' ? 
+                        <ChevronUp className="ml-1 h-4 w-4" /> : 
+                        <ChevronDown className="ml-1 h-4 w-4" />
+                    )}
+                  </div>
+                </TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProducts.length === 0 ? (
+              {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10">
+                  <TableCell colSpan={7} className="text-center py-10">
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredProducts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-10">
                     {searchTerm ? (
                       <div>
                         <p className="text-gray-500">No products match your search term</p>
                         <button 
                           onClick={() => setSearchTerm('')}
-                          className="text-alam-600 hover:text-alam-800 mt-2"
+                          className="text-primary-600 hover:text-primary-800 mt-2"
                         >
                           Clear search
                         </button>
@@ -237,15 +342,24 @@ const AdminProductManagement: React.FC = () => {
                 filteredProducts.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
-                      <img 
-                        src={product.images[0]} 
-                        alt={product.name}
-                        className="h-12 w-16 object-cover rounded"
-                      />
+                      {product.images?.length > 0 ? (
+                        <img 
+                          src={product.images[0]} 
+                          alt={product.name}
+                          className="h-12 w-16 object-cover rounded"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder-product.jpg';
+                          }}
+                        />
+                      ) : (
+                        <div className="h-12 w-16 bg-gray-100 rounded flex items-center justify-center">
+                          <span className="text-xs text-gray-400">No image</span>
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.brand}</TableCell>
-                    <TableCell>Rs. {product.price.toLocaleString()}</TableCell>
+                    <TableCell>Rs. {product.price?.toLocaleString()}</TableCell>
                     <TableCell>
                       <span 
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -258,6 +372,9 @@ const AdminProductManagement: React.FC = () => {
                       >
                         {product.status}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      {product.created_at ? formatDate(product.created_at) : '-'}
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
@@ -291,6 +408,9 @@ const AdminProductManagement: React.FC = () => {
           onSave={handleSaveProduct}
           product={editingProduct}
           mode={dialogMode}
+          onImageUpload={handleImageUpload}
+          onImageDelete={handleImageDelete}
+          imageUploading={imageUploading}
         />
       )}
       

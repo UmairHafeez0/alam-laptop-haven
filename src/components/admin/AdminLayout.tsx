@@ -7,6 +7,7 @@ import {
   Package, 
   LogOut, 
   Settings,
+  Image,
   Users 
 } from 'lucide-react';
 import { useAdminAuth, useAdminProtectedRoute } from '@/context/AdminAuthContext';
@@ -67,6 +68,21 @@ const AdminLayout: React.FC = () => {
               >
                 <Laptop className="mr-3 h-5 w-5" />
                 Products
+              </NavLink>
+            </li>
+            <li>
+              <NavLink 
+                to="/admin/image" 
+                className={({ isActive }) => 
+                  `flex items-center p-3 text-sm font-medium rounded-md ${
+                    isActive 
+                      ? 'bg-alam-50 text-alam-600' 
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <Image className="mr-3 h-5 w-5" />
+                Images
               </NavLink>
             </li>
             <li>

@@ -22,6 +22,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import { AdminAuthProvider } from "./context/AdminAuthContext";
 import AdminOrderManagement from "./pages/admin/AdminOrderManagement";
 import SupportWidget from "./components/SupportWidget";
+import AdminImageManagement from "./pages/admin/AdminImageManagement";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
