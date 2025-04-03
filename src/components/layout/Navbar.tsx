@@ -1,9 +1,10 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container } from '@/components/ui/Container';
 import { cn } from '@/lib/utils';
 import { Laptop, Search, ShoppingCart, Menu, X } from 'lucide-react';
-import { useCart } from "@/context/CartContext";
+
 import { 
   Sheet, 
   SheetContent, 
@@ -30,10 +31,7 @@ export function Navbar() {
   const [mobileSearchFocused, setMobileSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
-  const sheetCloseRef = useRef<HTMLButtonElement>(null);
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const { totalItems } = useCart();
+
   // Handle scroll event
   useEffect(() => {
     const handleScroll = () => {
@@ -53,16 +51,6 @@ export function Navbar() {
     }
   };
 
-  const handleMobileSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      // Programmatically click the SheetClose ref instead of using DOM query
-      if (sheetCloseRef.current) {
-        sheetCloseRef.current.click();
-      }
-    }
-  };
 
   return (
     <header
@@ -132,6 +120,7 @@ export function Navbar() {
                 </form>
               </PopoverContent>
             </Popover>
+
             <Link
   to="/cart"
   className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors relative"
@@ -159,19 +148,7 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="bg-white w-full sm:max-w-sm p-0">
               <div className="flex flex-col h-full">
-                {/* Mobile Header with Close Button */}
-                <div className="flex items-center justify-between px-4 pt-4 pb-5 border-b">
-                  <Link to="/" className="flex items-center gap-2">
-                    <Laptop className="h-6 w-6 text-alam-600" />
-                    <span className="text-xl font-semibold text-gray-900">Alam Laptop</span>
-                  </Link>
 
-                </div>
-                
-                {/* Mobile Search */}
-                <div className="px-4 py-4">
-                  <form 
-                    onSubmit={handleMobileSearch}
                     className={cn(
                       "flex items-center w-full transition-all duration-200 overflow-hidden",
                       "bg-gray-50 border rounded-md focus-within:border-alam-500 focus-within:ring-1 focus-within:ring-alam-500"
@@ -204,46 +181,13 @@ export function Navbar() {
                 {/* Mobile Navigation Links */}
                 <nav className="flex flex-col gap-1 px-4">
                   {NavLinks.map((link) => (
-                    <SheetClose asChild key={link.path}>
-                      <Link
-                        to={link.path}
-                        className={cn(
-                          'px-4 py-3 rounded-md text-lg transition-colors',
-                          pathname === link.path
-                            ? 'bg-alam-50 text-alam-600 font-medium'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        )}
-                      >
-                        {link.name}
-                      </Link>
-                    </SheetClose>
+
                   ))}
                 </nav>
                 
                 {/* Mobile Cart Link */}
                 <div className="mt-auto p-4 border-t">
-      <SheetClose asChild>
-        <Link
-          to="/cart"
-          className="flex items-center gap-2 px-4 py-3 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-        >
-          <div className="relative">
-          <Link
-  to="/cart"
-  className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors relative"
->
-  <ShoppingCart className="h-5 w-5" />
-  {totalItems > 0 && (
-    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-alam-600 text-[10px] font-medium text-white">
-      {totalItems}
-    </span>
-  )}
-</Link>
-          </div>
-          <span>Cart ({totalItems})</span>
-        </Link>
-      </SheetClose>
-    </div>
+
               </div>
             </SheetContent>
           </Sheet>
